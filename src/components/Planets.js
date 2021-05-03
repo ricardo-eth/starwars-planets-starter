@@ -9,9 +9,19 @@ const Planets = () => {
   const [hasNext, setHasNext] = useState(null);
 
   useEffect(() => {
+    let isCancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError("");
-    fetch(`https://swapi.dev/api/planets/?page=${page}`)
+    fetch(`https://swapi.dev/api/planets/?page=${page}`, {
+      signal: controller.signal,
+    })
+      // ⚠️ surtout NE PAS OUBLIER d'ENLEVER ⚠️
+      .then((response) => {
+        return new Promise((resolved) => {
+          setTimeout(() => resolved(response), 2000);
+        });
+      })
       .then((response) => {
         if (!response.ok) {
           throw new Error(
@@ -21,15 +31,23 @@ const Planets = () => {
         return response.json();
       })
       .then((data) => {
+        console.log("I get data");
         console.log(data);
-        setPlanets((planets) => [...planets, ...data.results]);
-        setHasNext(!!data.next); // or setHasNext(data.next ? true : false);
-        setLoading(false);
+        if (!isCancelled) {
+          console.log("I will update component");
+          setPlanets((planets) => [...planets, ...data.results]);
+          setHasNext(!!data.next); // or setHasNext(data.next ? true : false);
+          setLoading(false);
+        }
       })
       .catch((error) => {
-        console.error(error.message);
-        setLoading(false);
-        setError(error.message);
+        if (!isCancelled) {
+          console.log("I want to cancel");
+          console.error(error.message);
+          setLoading(false);
+          setError(error.message);
+          controller.abort();
+        }
       });
   }, [page]);
 
@@ -42,7 +60,7 @@ const Planets = () => {
       </div>
       {loading && <div className="mb-4 text-center p-3">loading...</div>}
       {error && <p className="alert alert-danger">{error}</p>}
-      {hasNext && (
+      {!loading && hasNext && (
         <button
           type="button"
           className="btn btn-dark"
@@ -54,7 +72,7 @@ const Planets = () => {
           Suivantes
         </button>
       )}
-      {!hasNext && (
+      {!hasNext && !loading && (
         <p className="bg-dark text-white p-3">
           Nous avons listé toutes les planètes recensées.
         </p>
