@@ -3,8 +3,10 @@ import Planet from "./Planet";
 
 const Planets = () => {
   const [planets, setPlanets] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
     fetch("https://swapi.dev/api/planets/?page=1")
       .then((response) => {
         if (!response.ok) {
@@ -16,9 +18,11 @@ const Planets = () => {
       })
       .then((data) => {
         setPlanets(data.results);
+        setLoading(false);
       })
       .catch((error) => {
         console.error(error.message);
+        setLoading(false);
       });
   }, []);
 
@@ -29,6 +33,7 @@ const Planets = () => {
           return <Planet key={planet.name} planet={planet} />;
         })}
       </div>
+      {loading && <div className="mb-4 text-center p-3">loading...</div>}
     </>
   );
 };
