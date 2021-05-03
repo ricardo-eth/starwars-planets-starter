@@ -49,6 +49,7 @@ const Planets = () => {
           onClick={() => {
             setPage(page + 1);
           }}
+          disabled={loading}
         >
           Suivantes
         </button>
