@@ -5,11 +5,12 @@ const Planets = () => {
   const [planets, setPlanets] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetch("https://swapi.dev/api/planets/?page=1")
+    fetch(`https://swapi.dev/api/planets/?page=${page}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(
@@ -19,7 +20,7 @@ const Planets = () => {
         return response.json();
       })
       .then((data) => {
-        setPlanets(data.results);
+        setPlanets((planets) => [...planets, ...data.results]);
         setLoading(false);
       })
       .catch((error) => {
@@ -27,7 +28,7 @@ const Planets = () => {
         setLoading(false);
         setError(error.message);
       });
-  }, []);
+  }, [page]);
 
   return (
     <>
@@ -38,6 +39,15 @@ const Planets = () => {
       </div>
       {loading && <div className="mb-4 text-center p-3">loading...</div>}
       {error && <p className="alert alert-danger">{error}</p>}
+      <button
+        type="button"
+        className="btn btn-dark"
+        onClick={() => {
+          setPage(page + 1);
+        }}
+      >
+        Suivantes
+      </button>
     </>
   );
 };
