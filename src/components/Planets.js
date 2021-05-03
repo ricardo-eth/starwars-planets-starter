@@ -4,9 +4,11 @@ import Planet from "./Planet";
 const Planets = () => {
   const [planets, setPlanets] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setLoading(true);
+    setError("");
     fetch("https://swapi.dev/api/planets/?page=1")
       .then((response) => {
         if (!response.ok) {
@@ -23,6 +25,7 @@ const Planets = () => {
       .catch((error) => {
         console.error(error.message);
         setLoading(false);
+        setError(error.message);
       });
   }, []);
 
@@ -34,6 +37,7 @@ const Planets = () => {
         })}
       </div>
       {loading && <div className="mb-4 text-center p-3">loading...</div>}
+      {error && <p className="alert alert-danger">{error}</p>}
     </>
   );
 };
